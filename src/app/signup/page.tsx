@@ -12,9 +12,9 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
 
   return (
     <AuthCard
-      eyebrow="Create account"
-      title="Start monitoring"
-      description="Create your BitBash Crypto Sentry account with email and password."
+      eyebrow="New operative request / BitBash Sentry"
+      title="Request Access"
+      description="Create a verified account before entering the crypto monitoring console."
     >
       <SignupForm returnUrl={returnUrl} />
     </AuthCard>

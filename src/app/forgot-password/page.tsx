@@ -4,12 +4,11 @@ import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 export default function ForgotPasswordPage() {
   return (
     <AuthCard
-      eyebrow="Password help"
-      title="Reset access"
-      description="Enter your account email and a reset link will be printed in the dev server terminal."
+      eyebrow="Recovery protocol / BitBash Sentry"
+      title="Recover Access"
+      description="Generate a secure password reset or first-time password setup link."
     >
       <ForgotPasswordForm />
     </AuthCard>
   );
 }
-

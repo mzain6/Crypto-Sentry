@@ -46,11 +46,11 @@ export function LoginForm({ googleEnabled, returnUrl }: LoginFormProps) {
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
       <label>
-        Email
+        Email Identifier
         <input name="email" type="email" autoComplete="email" required />
       </label>
       <label>
-        Password
+        Secure Passkey
         <input
           name="password"
           type="password"
@@ -60,7 +60,7 @@ export function LoginForm({ googleEnabled, returnUrl }: LoginFormProps) {
       </label>
       <FormMessage message={message} />
       <button className="button primary full" disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Signing in..." : "Sign in"}
+        {isSubmitting ? "Initiating..." : "Initiate Login"}
       </button>
       <button
         className="button full"
@@ -68,11 +68,11 @@ export function LoginForm({ googleEnabled, returnUrl }: LoginFormProps) {
         onClick={() => signIn("google", { callbackUrl: returnUrl })}
         type="button"
       >
-        {googleEnabled ? "Continue with Google" : "Google sign-in not configured"}
+        {googleEnabled ? "Sign in with Google" : "Google sign-in not configured"}
       </button>
       <div className="auth-links">
-        <Link href="/forgot-password">Forgot password?</Link>
-        <Link href="/signup">Create account</Link>
+        <Link href="/forgot-password">Recover access</Link>
+        <Link href="/signup">Request access</Link>
       </div>
     </form>
   );

@@ -14,9 +14,9 @@ export default function ResetPasswordPage({
 
   return (
     <AuthCard
-      eyebrow="New password"
-      title="Set password"
-      description="Choose a new password for your BitBash Crypto Sentry account."
+      eyebrow="Credential reset / BitBash Sentry"
+      title="Reset Passkey"
+      description="Choose a new secure passkey for your crypto monitoring console."
     >
       {token ? (
         <ResetPasswordForm token={token} />
@@ -26,4 +26,3 @@ export default function ResetPasswordPage({
     </AuthCard>
   );
 }
-

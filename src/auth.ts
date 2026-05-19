@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { getServerSession } from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
@@ -36,7 +37,7 @@ const providers: NextAuthOptions["providers"] = [
         where: { email },
       });
 
-      if (!user?.passwordHash) {
+      if (!user?.passwordHash || !user.emailVerified) {
         return null;
       }
 
@@ -61,6 +62,13 @@ if (env.googleClientId && env.googleClientSecret) {
     GoogleProvider({
       clientId: env.googleClientId,
       clientSecret: env.googleClientSecret,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
     }),
   );
 }
@@ -87,19 +95,62 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
-      await prisma.user.upsert({
+      const dbUser = await prisma.user.upsert({
         where: { email },
         update: {
           name: googleProfile?.name ?? email,
           imageUrl: getProfileImage(googleProfile ?? {}),
+          emailVerified: new Date(),
         },
         create: {
           name: googleProfile?.name ?? email,
           email,
           imageUrl: getProfileImage(googleProfile ?? {}),
           passwordHash: null,
+          emailVerified: new Date(),
         },
       });
+
+      if (account?.providerAccountId) {
+        await prisma.account.upsert({
+          where: {
+            provider_providerAccountId: {
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+          },
+          update: {
+            userId: dbUser.id,
+            type: account.type,
+            refreshToken: account.refresh_token ?? undefined,
+            accessToken: account.access_token ?? null,
+            expiresAt: account.expires_at ?? null,
+            tokenType: account.token_type ?? null,
+            scope: account.scope ?? null,
+            idToken: account.id_token ?? null,
+            sessionState:
+              typeof account.session_state === "string"
+                ? account.session_state
+                : null,
+          },
+          create: {
+            userId: dbUser.id,
+            type: account.type,
+            provider: account.provider,
+            providerAccountId: account.providerAccountId,
+            refreshToken: account.refresh_token ?? null,
+            accessToken: account.access_token ?? null,
+            expiresAt: account.expires_at ?? null,
+            tokenType: account.token_type ?? null,
+            scope: account.scope ?? null,
+            idToken: account.id_token ?? null,
+            sessionState:
+              typeof account.session_state === "string"
+                ? account.session_state
+                : null,
+          },
+        });
+      }
 
       return true;
     },
@@ -138,3 +189,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
+export function auth() {
+  return getServerSession(authOptions);
+}

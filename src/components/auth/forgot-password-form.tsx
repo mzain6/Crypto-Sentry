@@ -1,49 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
+
+import { forgotPasswordAction } from "@/lib/auth/password-actions";
 
 import { FormMessage } from "./form-message";
 
-export function ForgotPasswordForm() {
-  const [message, setMessage] = useState<string | null>(null);
-  const [tone, setTone] = useState<"error" | "success">("error");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsSubmitting(true);
-    setMessage(null);
-
-    const formData = new FormData(event.currentTarget);
-    const response = await fetch("/api/auth/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: String(formData.get("email") ?? ""),
-      }),
-    });
-    const body = (await response.json()) as { message?: string };
-
-    setTone(response.ok ? "success" : "error");
-    setMessage(body.message ?? "Could not create a reset link.");
-    setIsSubmitting(false);
-  }
+function SubmitButton() {
+  const { pending } = useFormStatus();
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit}>
+    <button className="button primary full" disabled={pending} type="submit">
+      {pending ? "Creating link..." : "Create Recovery Link"}
+    </button>
+  );
+}
+
+export function ForgotPasswordForm() {
+  const [state, formAction] = useFormState(
+    forgotPasswordAction,
+    { message: null, tone: "error" },
+  );
+
+  return (
+    <form action={formAction} className="auth-form">
       <label>
-        Email
+        Email Identifier
         <input name="email" type="email" autoComplete="email" required />
       </label>
-      <FormMessage message={message} tone={tone} />
-      <button className="button primary full" disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Creating link..." : "Create reset link"}
-      </button>
+      <FormMessage message={state.message} tone={state.tone} />
+      <SubmitButton />
       <div className="auth-links">
-        <Link href="/login">Back to login</Link>
+        <Link href="/login">Back to terminal</Link>
       </div>
     </form>
   );
 }
-

@@ -7,6 +7,8 @@ type AppEnv = {
   nextAuthSecret: string;
   googleClientId: string | null;
   googleClientSecret: string | null;
+  resendApiKey: string | null;
+  authFromEmail: string | null;
 };
 
 function readIntegerEnv(name: string, fallback: number) {
@@ -47,4 +49,6 @@ export const env: AppEnv = {
   nextAuthSecret: readRequiredEnv("NEXTAUTH_SECRET"),
   googleClientId: process.env.GOOGLE_CLIENT_ID || null,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || null,
+  resendApiKey: process.env.RESEND_API_KEY || null,
+  authFromEmail: process.env.AUTH_FROM_EMAIL || null,
 };

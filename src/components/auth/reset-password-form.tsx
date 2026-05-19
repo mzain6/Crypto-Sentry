@@ -44,7 +44,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
       <label>
-        New password
+        New Passkey
         <input
           name="password"
           type="password"
@@ -54,7 +54,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         />
       </label>
       <label>
-        Confirm new password
+        Confirm Passkey
         <input
           name="confirmPassword"
           type="password"
@@ -65,12 +65,11 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       </label>
       <FormMessage message={message} />
       <button className="button primary full" disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Resetting..." : "Reset password"}
+        {isSubmitting ? "Resetting..." : "Reset Passkey"}
       </button>
       <div className="auth-links">
-        <Link href="/login">Back to login</Link>
+        <Link href="/login">Back to terminal</Link>
       </div>
     </form>
   );
 }
-

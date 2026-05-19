@@ -13,9 +13,9 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <AuthCard
-      eyebrow="Welcome back"
-      title="Sign in"
-      description="Access your crypto monitoring workspace, alerts, and watchlist."
+      eyebrow="Establish secure link / BitBash Sentry"
+      title="Access Terminal"
+      description="Authenticate your identity to enter the crypto monitoring console."
     >
       <LoginForm
         googleEnabled={Boolean(env.googleClientId && env.googleClientSecret)}

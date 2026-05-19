@@ -11,11 +11,13 @@ async function main() {
     update: {
       name: "Test User",
       passwordHash,
+      emailVerified: new Date(),
     },
     create: {
       name: "Test User",
       email: "test@example.com",
       passwordHash,
+      emailVerified: new Date(),
     },
   });
 }

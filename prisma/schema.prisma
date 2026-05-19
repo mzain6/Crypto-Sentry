@@ -8,18 +8,45 @@ datasource db {
 }
 
 model User {
-  id                  String               @id @default(cuid())
-  name                String
-  email               String               @unique
-  passwordHash        String?              @map("password_hash")
-  imageUrl            String?              @map("image_url")
-  createdAt           DateTime             @default(now()) @map("created_at")
-  updatedAt           DateTime             @updatedAt @map("updated_at")
-  watchlists          Watchlist[]
-  alerts              Alert[]
-  passwordResetTokens PasswordResetToken[]
+  id                         String               @id @default(cuid())
+  name                       String
+  email                      String               @unique
+  passwordHash               String?              @map("password_hash")
+  imageUrl                   String?              @map("image_url")
+  emailVerified              DateTime?            @map("email_verified")
+  emailVerificationTokenHash String?              @map("email_verification_token_hash")
+  emailVerificationExpiresAt DateTime?            @map("email_verification_expires_at")
+  passwordTokenHash          String?              @map("password_token_hash")
+  passwordTokenType          String?              @map("password_token_type")
+  passwordTokenExpiry        DateTime?            @map("password_token_expiry")
+  createdAt                  DateTime             @default(now()) @map("created_at")
+  updatedAt                  DateTime             @updatedAt @map("updated_at")
+  watchlists                 Watchlist[]
+  alerts                     Alert[]
+  passwordResetTokens        PasswordResetToken[]
+  accounts                   Account[]
 
   @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refreshToken      String? @map("refresh_token")
+  accessToken       String? @map("access_token")
+  expiresAt         Int?    @map("expires_at")
+  tokenType         String? @map("token_type")
+  scope             String?
+  idToken           String? @map("id_token")
+  sessionState      String? @map("session_state")
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
 }
 
 model Coin {

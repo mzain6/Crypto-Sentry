@@ -1,8 +1,6 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { FormMessage } from "./form-message";
@@ -11,9 +9,9 @@ type SignupFormProps = {
   returnUrl: string;
 };
 
-export function SignupForm({ returnUrl }: SignupFormProps) {
-  const router = useRouter();
+export function SignupForm({ returnUrl: _returnUrl }: SignupFormProps) {
   const [message, setMessage] = useState<string | null>(null);
+  const [tone, setTone] = useState<"error" | "success">("error");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -38,39 +36,32 @@ export function SignupForm({ returnUrl }: SignupFormProps) {
     if (!response.ok) {
       const body = (await response.json()) as { message?: string };
       setMessage(body.message ?? "Could not create account.");
+      setTone("error");
       setIsSubmitting(false);
       return;
     }
 
-    const result = await signIn("credentials", {
-      email: payload.email,
-      password: payload.password,
-      redirect: false,
-    });
-
+    const body = (await response.json()) as { message?: string };
+    setMessage(
+      body.message ??
+        "Account created. Please check your email before logging in.",
+    );
+    setTone("success");
     setIsSubmitting(false);
-
-    if (result?.error) {
-      router.push("/login");
-      return;
-    }
-
-    router.push(returnUrl);
-    router.refresh();
   }
 
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
       <label>
-        Name
+        Operative Name
         <input name="name" type="text" autoComplete="name" minLength={2} required />
       </label>
       <label>
-        Email
+        Email Identifier
         <input name="email" type="email" autoComplete="email" required />
       </label>
       <label>
-        Password
+        Secure Passkey
         <input
           name="password"
           type="password"
@@ -80,7 +71,7 @@ export function SignupForm({ returnUrl }: SignupFormProps) {
         />
       </label>
       <label>
-        Confirm password
+        Confirm Passkey
         <input
           name="confirmPassword"
           type="password"
@@ -89,12 +80,12 @@ export function SignupForm({ returnUrl }: SignupFormProps) {
           required
         />
       </label>
-      <FormMessage message={message} />
+      <FormMessage message={message} tone={tone} />
       <button className="button primary full" disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Creating account..." : "Create account"}
+        {isSubmitting ? "Creating access..." : "Create Access"}
       </button>
       <div className="auth-links">
-        <Link href="/login">Already have an account?</Link>
+        <Link href="/login">Already registered? Sign in</Link>
       </div>
     </form>
   );
