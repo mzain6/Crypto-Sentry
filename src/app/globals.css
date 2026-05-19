@@ -1,0 +1,271 @@
+:root {
+  color-scheme: dark;
+  background: #0f1419;
+  color: #f4f7fb;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.18), transparent 30rem),
+    linear-gradient(135deg, #0f1419 0%, #17202a 52%, #101820 100%);
+}
+
+a {
+  color: inherit;
+}
+
+.page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px;
+}
+
+.shell {
+  width: min(880px, 100%);
+}
+
+.eyebrow {
+  color: #5eead4;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 12px 0 16px;
+  font-size: clamp(2.5rem, 8vw, 5.5rem);
+  line-height: 0.95;
+}
+
+p {
+  color: #cbd5e1;
+  font-size: 1.08rem;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 720px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 8px;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  text-decoration: none;
+}
+
+.button.primary {
+  background: #14b8a6;
+  border-color: #14b8a6;
+  color: #052e2b;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.button.full {
+  width: 100%;
+}
+
+.status {
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 44px;
+  padding-top: 20px;
+}
+
+.auth-page {
+  align-items: start;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.auth-shell {
+  display: grid;
+  gap: 28px;
+  grid-template-rows: auto 1fr;
+  min-height: calc(100vh - 64px);
+  width: min(1020px, 100%);
+}
+
+.auth-copy {
+  justify-self: center;
+  padding-top: 18px;
+  text-align: center;
+}
+
+.auth-copy h1 {
+  font-size: clamp(2.25rem, 5.5vw, 3.8rem);
+  margin-bottom: 18px;
+}
+
+.auth-panel {
+  align-self: center;
+  background: rgba(15, 23, 42, 0.76);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 8px;
+  justify-self: center;
+  padding: 24px;
+  width: min(420px, 100%);
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+}
+
+.auth-form label {
+  color: #e2e8f0;
+  display: grid;
+  font-size: 0.92rem;
+  font-weight: 700;
+  gap: 8px;
+}
+
+.auth-form input {
+  background: rgba(15, 23, 42, 0.84);
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 8px;
+  color: #f8fafc;
+  font: inherit;
+  min-height: 44px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.auth-form input:focus {
+  border-color: #5eead4;
+  outline: 2px solid rgba(20, 184, 166, 0.22);
+}
+
+.form-message {
+  border-radius: 8px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  max-width: none;
+  padding: 10px 12px;
+}
+
+.form-message.error {
+  background: rgba(239, 68, 68, 0.14);
+  color: #fecaca;
+}
+
+.form-message.success {
+  background: rgba(20, 184, 166, 0.14);
+  color: #99f6e4;
+}
+
+.auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.92rem;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.auth-links a {
+  color: #5eead4;
+  text-decoration: none;
+}
+
+.dashboard-shell h1 {
+  font-size: clamp(2.2rem, 6vw, 4.8rem);
+}
+
+.profile-row {
+  align-items: center;
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+  display: flex;
+  gap: 14px;
+  margin-top: 28px;
+  padding-top: 22px;
+}
+
+.profile-row strong,
+.profile-row span {
+  display: block;
+}
+
+.profile-row span {
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.avatar {
+  border-radius: 999px;
+}
+
+.avatar.fallback {
+  align-items: center;
+  background: #14b8a6;
+  color: #052e2b;
+  display: flex;
+  font-size: 1.4rem;
+  font-weight: 800;
+  height: 64px;
+  justify-content: center;
+  width: 64px;
+}
+
+.status div {
+  color: #94a3b8;
+  font-size: 0.92rem;
+}
+
+.status strong {
+  color: #f8fafc;
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 24px;
+  }
+
+  .status {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-page {
+    padding: 24px;
+  }
+
+  .auth-shell {
+    gap: 28px;
+    min-height: calc(100vh - 48px);
+  }
+}

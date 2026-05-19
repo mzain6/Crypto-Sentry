@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String               @id @default(cuid())
+  name                String
+  email               String               @unique
+  passwordHash        String?              @map("password_hash")
+  imageUrl            String?              @map("image_url")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+  watchlists          Watchlist[]
+  alerts              Alert[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+model Coin {
+  id             String              @id @default(cuid())
+  providerId     String              @unique @map("provider_id")
+  symbol         String
+  name           String
+  createdAt      DateTime            @default(now()) @map("created_at")
+  updatedAt      DateTime            @updatedAt @map("updated_at")
+  priceSnapshots CoinPriceSnapshot[]
+  watchlists     Watchlist[]
+  alerts         Alert[]
+
+  @@map("coins")
+}
+
+model CoinPriceSnapshot {
+  id                       String   @id @default(cuid())
+  coinId                   String   @map("coin_id")
+  priceUsd                 Decimal  @map("price_usd") @db.Decimal(24, 8)
+  marketCapUsd             Decimal? @map("market_cap_usd") @db.Decimal(32, 2)
+  volumeUsd                Decimal? @map("volume_usd") @db.Decimal(32, 2)
+  priceChangePercentage24h Decimal? @map("price_change_percentage_24h") @db.Decimal(12, 6)
+  recordedAt               DateTime @default(now()) @map("recorded_at")
+  coin                     Coin     @relation(fields: [coinId], references: [id], onDelete: Cascade)
+
+  @@index([coinId, recordedAt])
+  @@map("coin_price_snapshots")
+}
+
+model Watchlist {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  coinId    String   @map("coin_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coin      Coin     @relation(fields: [coinId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, coinId])
+  @@index([coinId])
+  @@map("watchlists")
+}
+
+model Alert {
+  id                String         @id @default(cuid())
+  userId            String         @map("user_id")
+  coinId            String         @map("coin_id")
+  condition         AlertCondition
+  thresholdPriceUsd Decimal        @map("threshold_price_usd") @db.Decimal(24, 8)
+  status            AlertStatus    @default(ACTIVE)
+  triggeredAt       DateTime?      @map("triggered_at")
+  triggeredPriceUsd Decimal?       @map("triggered_price_usd") @db.Decimal(24, 8)
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coin              Coin           @relation(fields: [coinId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([coinId, status])
+  @@map("alerts")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+enum AlertCondition {
+  PRICE_ABOVE
+  PRICE_BELOW
+}
+
+enum AlertStatus {
+  ACTIVE
+  TRIGGERED
+  PAUSED
+}

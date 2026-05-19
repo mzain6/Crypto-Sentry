@@ -1,0 +1,39 @@
+{
+  "name": "crypto-sentry",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "prisma db seed",
+    "ingest:once": "tsx src/server/ingestion/run-ingestion.ts --once",
+    "ingest:watch": "tsx src/server/ingestion/run-ingestion.ts --watch"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^3.0.3",
+    "next": "^14.2.29",
+    "next-auth": "^4.24.14",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.57",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.29",
+    "prettier": "^3.5.3",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}
