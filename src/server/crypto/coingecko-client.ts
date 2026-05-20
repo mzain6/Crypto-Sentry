@@ -6,6 +6,7 @@ type CoinGeckoMarketCoin = {
   id: string;
   symbol: string;
   name: string;
+  image: string | null;
   current_price: number | null;
   market_cap: number | null;
   total_volume: number | null;
@@ -28,6 +29,7 @@ function normalizeCoin(coin: CoinGeckoMarketCoin): NormalizedCoinMarket | null {
     providerId: coin.id,
     symbol: coin.symbol.toLowerCase(),
     name: coin.name,
+    imageUrl: coin.image,
     currentPriceUsd: coin.current_price,
     marketCapUsd: coin.market_cap,
     volumeUsd: coin.total_volume,
@@ -45,7 +47,7 @@ export async function fetchCoinGeckoMarkets(
   url.searchParams.set("page", "1");
   url.searchParams.set("sparkline", "false");
   url.searchParams.set("price_change_percentage", "24h");
-console.log(`Fetching CoinGecko markets with URL: ${url.toString()}`);
+
   const headers: HeadersInit = {
     accept: "application/json",
   };
@@ -84,4 +86,3 @@ console.log(`Fetching CoinGecko markets with URL: ${url.toString()}`);
 
   throw lastError ?? new Error("CoinGecko request failed.");
 }
-

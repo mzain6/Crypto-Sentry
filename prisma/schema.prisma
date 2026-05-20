@@ -23,10 +23,23 @@ model User {
   updatedAt                  DateTime             @updatedAt @map("updated_at")
   watchlists                 Watchlist[]
   alerts                     Alert[]
+  holdings                   PortfolioHolding[]
   passwordResetTokens        PasswordResetToken[]
   accounts                   Account[]
+  settings                   UserSettings?
 
   @@map("users")
+}
+
+model UserSettings {
+  id                       String   @id @default(cuid())
+  userId                   String   @unique @map("user_id")
+  hasSeenDashboardTutorial Boolean  @default(false) @map("has_seen_dashboard_tutorial")
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
 }
 
 model Account {
@@ -54,11 +67,13 @@ model Coin {
   providerId     String              @unique @map("provider_id")
   symbol         String
   name           String
+  imageUrl       String?             @map("image_url")
   createdAt      DateTime            @default(now()) @map("created_at")
   updatedAt      DateTime            @updatedAt @map("updated_at")
   priceSnapshots CoinPriceSnapshot[]
   watchlists     Watchlist[]
   alerts         Alert[]
+  holdings       PortfolioHolding[]
 
   @@map("coins")
 }
@@ -88,6 +103,21 @@ model Watchlist {
   @@unique([userId, coinId])
   @@index([coinId])
   @@map("watchlists")
+}
+
+model PortfolioHolding {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  coinId    String   @map("coin_id")
+  quantity  Decimal  @db.Decimal(32, 12)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coin      Coin     @relation(fields: [coinId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, coinId])
+  @@index([coinId])
+  @@map("portfolio_holdings")
 }
 
 model Alert {

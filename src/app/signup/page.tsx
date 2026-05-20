@@ -1,5 +1,6 @@
 import { AuthCard } from "@/components/auth/auth-card";
 import { SignupForm } from "@/components/auth/signup-form";
+import { env } from "@/lib/env";
 
 type SignupPageProps = {
   searchParams: {
@@ -16,7 +17,10 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
       title="Request Access"
       description="Create a verified account before entering the crypto monitoring console."
     >
-      <SignupForm returnUrl={returnUrl} />
+      <SignupForm
+        googleEnabled={Boolean(env.googleClientId && env.googleClientSecret)}
+        returnUrl={returnUrl}
+      />
     </AuthCard>
   );
 }

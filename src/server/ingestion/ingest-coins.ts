@@ -23,11 +23,13 @@ export async function ingestCoins(): Promise<IngestionResult> {
       update: {
         symbol: coinMarket.symbol,
         name: coinMarket.name,
+        imageUrl: coinMarket.imageUrl,
       },
       create: {
         providerId: coinMarket.providerId,
         symbol: coinMarket.symbol,
         name: coinMarket.name,
+        imageUrl: coinMarket.imageUrl,
       },
     });
 
@@ -53,4 +55,3 @@ export async function ingestCoins(): Promise<IngestionResult> {
     finishedAt: new Date(),
   };
 }
-

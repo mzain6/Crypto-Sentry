@@ -43,7 +43,7 @@ export const env: AppEnv = {
   coinIngestLimit: readIntegerEnv("COIN_INGEST_LIMIT", 50),
   coinIngestIntervalSeconds: readIntegerEnv(
     "COIN_INGEST_INTERVAL_SECONDS",
-    60,
+    30,
   ),
   nextAuthUrl: process.env.NEXTAUTH_URL || "http://localhost:3000",
   nextAuthSecret: readRequiredEnv("NEXTAUTH_SECRET"),

@@ -6,6 +6,7 @@ const protectedPrefixes = [
   "/dashboard",
   "/watchlist",
   "/alerts",
+  "/market-data",
   "/profile",
   "/settings",
 ];
@@ -38,6 +39,7 @@ export const config = {
     "/dashboard/:path*",
     "/watchlist/:path*",
     "/alerts/:path*",
+    "/market-data/:path*",
     "/profile/:path*",
     "/settings/:path*",
   ],

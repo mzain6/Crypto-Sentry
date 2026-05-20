@@ -1,15 +1,17 @@
 "use client";
 
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { FormMessage } from "./form-message";
 
 type SignupFormProps = {
+  googleEnabled: boolean;
   returnUrl: string;
 };
 
-export function SignupForm({ returnUrl: _returnUrl }: SignupFormProps) {
+export function SignupForm({ googleEnabled, returnUrl }: SignupFormProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [tone, setTone] = useState<"error" | "success">("error");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,6 +85,16 @@ export function SignupForm({ returnUrl: _returnUrl }: SignupFormProps) {
       <FormMessage message={message} tone={tone} />
       <button className="button primary full" disabled={isSubmitting} type="submit">
         {isSubmitting ? "Creating access..." : "Create Access"}
+      </button>
+      <button
+        className="button full"
+        disabled={!googleEnabled || isSubmitting}
+        onClick={() => signIn("google", { callbackUrl: returnUrl })}
+        type="button"
+      >
+        {googleEnabled
+          ? "Sign up with Google"
+          : "Google sign-up not configured"}
       </button>
       <div className="auth-links">
         <Link href="/login">Already registered? Sign in</Link>
