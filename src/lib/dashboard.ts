@@ -284,28 +284,28 @@ export async function getRecentAlerts(_userId: string): Promise<RecentAlert[]> {
 }
 
 export async function getWatchlistSnapshot(
-  _userId: string,
+  userId: string,
 ): Promise<WatchlistSnapshotItem[]> {
-  const coins = await prisma.coin.findMany({
-    where: {
-      providerId: {
-        in: DEMO_HOLDINGS.map((holding) => holding.providerId),
-      },
-    },
+  const watchlistRows = await prisma.watchlist.findMany({
+    where: { userId },
+    orderBy: { createdAt: "asc" },
     take: LIMIT,
     include: {
-      priceSnapshots: {
-        orderBy: { recordedAt: "desc" },
-        take: 1,
+      coin: {
+        include: {
+          priceSnapshots: {
+            orderBy: { recordedAt: "desc" },
+            take: 1,
+          },
+        },
       },
     },
-    orderBy: { providerId: "asc" },
   });
 
-  return coins.map((coin) => ({
-    ...toDashboardCoin(coin),
-    watchlistId: `shared-${coin.id}`,
-    addedAt: coin.createdAt.toISOString(),
+  return watchlistRows.map((row) => ({
+    ...toDashboardCoin(row.coin),
+    watchlistId: row.id,
+    addedAt: row.createdAt.toISOString(),
   }));
 }
 

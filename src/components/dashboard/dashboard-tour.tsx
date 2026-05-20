@@ -87,10 +87,15 @@ export function DashboardTour({ enabled }: DashboardTourProps) {
   const step = steps[stepIndex];
   const isFinalStep = stepIndex === steps.length - 1;
 
-  const updateSpotlight = useCallback(() => {
-    const target =
+  const getTargetElement = useCallback(() => {
+    return (
       document.getElementById(step.targetId) ??
-      document.getElementById(fallbackTargetIdByStep[step.targetId] ?? "");
+      document.getElementById(fallbackTargetIdByStep[step.targetId] ?? "")
+    );
+  }, [step.targetId]);
+
+  const updateSpotlight = useCallback(() => {
+    const target = getTargetElement();
 
     if (!target) {
       setSpotlight(null);
@@ -116,7 +121,7 @@ export function DashboardTour({ enabled }: DashboardTourProps) {
         return;
       }
 
-      const padding = isSidebarTargetId(step.targetId) ? 3 : 10;
+      const padding = isSidebarTargetId(step.targetId) ? 5 : 12;
       setSpotlight({
         height: fallbackRect.height + padding * 2,
         left: fallbackRect.left - padding,
@@ -126,14 +131,14 @@ export function DashboardTour({ enabled }: DashboardTourProps) {
       return;
     }
 
-    const padding = isSidebarTargetId(step.targetId) ? 3 : 10;
+    const padding = isSidebarTargetId(step.targetId) ? 5 : 12;
     setSpotlight({
       height: rect.height + padding * 2,
       left: rect.left - padding,
       top: rect.top - padding,
       width: rect.width + padding * 2,
     });
-  }, [step.targetId]);
+  }, [getTargetElement, step.targetId]);
 
   useEffect(() => {
     if (!enabled || dismissed) {
@@ -150,9 +155,27 @@ export function DashboardTour({ enabled }: DashboardTourProps) {
     };
   }, [dismissed, enabled, updateSpotlight]);
 
+  useEffect(() => {
+    if (!enabled || dismissed) {
+      return;
+    }
+
+    const target = getTargetElement();
+
+    if (!target) {
+      return;
+    }
+
+    target.classList.add("dashboard-tour-target-active");
+
+    return () => {
+      target.classList.remove("dashboard-tour-target-active");
+    };
+  }, [dismissed, enabled, getTargetElement]);
+
   const cardPosition = useMemo(() => {
-    const cardWidth = 390;
-    const cardHeight = 260;
+    const cardWidth = 270;
+    const cardHeight = 205;
     const margin = 18;
     const viewportWidth =
       typeof window === "undefined" ? 1200 : window.innerWidth;
@@ -303,7 +326,7 @@ export function DashboardTour({ enabled }: DashboardTourProps) {
                 Skip Induction
               </button>
               <button className="primary" onClick={handlePrimaryAction} type="button">
-                {isFinalStep ? "Finish ->" : "Got it ->"}
+                {isFinalStep ? "Finish" : "Got it"}
               </button>
             </div>
           </motion.aside>

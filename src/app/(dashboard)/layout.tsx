@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
+import { DashboardFrame } from "@/components/dashboard/dashboard-frame";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
-import { DashboardTopbar } from "@/components/dashboard/topbar";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -21,23 +21,7 @@ export default async function DashboardLayout({
   return (
     <div className="terminal-dashboard">
       <DashboardSidebar user={session.user} />
-      <div className="terminal-workspace">
-        <DashboardTopbar user={session.user} />
-        <main className="terminal-main">
-          <section className="terminal-header">
-            <div className="terminal-header-icon" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
-            <div>
-              <h1>TERMINAL ONE</h1>
-              <p>REAL-TIME INTELLIGENCE AGGREGATE V4.2.0</p>
-            </div>
-          </section>
-          {children}
-        </main>
-      </div>
+      <DashboardFrame user={session.user}>{children}</DashboardFrame>
     </div>
   );
 }
