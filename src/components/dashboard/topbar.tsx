@@ -14,15 +14,6 @@ function getInitial(name?: string | null) {
 export function DashboardTopbar({ user }: DashboardTopbarProps) {
   return (
     <header className="terminal-topbar">
-      <label className="terminal-search">
-        <span aria-hidden="true" />
-        <input
-          aria-label="Search dashboard"
-          placeholder="Search Assets, Protocols or TX IDs..."
-          type="search"
-        />
-      </label>
-
       <div className="terminal-topbar-meta">
         <div className="terminal-network">
           <span>Network Status</span>

@@ -1,4 +1,16 @@
-export default function AlertsPage() {
+import { auth } from "@/auth";
+import { AlertsClient } from "@/components/alerts/alerts-client";
+import { getUserAlerts } from "@/lib/alerts";
+
+export default async function AlertsPage() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return null;
+  }
+
+  const alerts = await getUserAlerts(session.user.id);
+
   return (
     <>
       <section className="terminal-page-heading">
@@ -7,19 +19,11 @@ export default function AlertsPage() {
         </div>
         <div>
           <h1>Alerts</h1>
-          <p>Triggered conditions and system notifications</p>
+          <p>Watchlist price movement detection feed</p>
         </div>
       </section>
-      <section className="terminal-panel terminal-empty-panel">
-        <div>
-          <div className="terminal-panel-kicker">Alert Channel</div>
-          <h2>Alerts Module Pending</h2>
-          <p>
-            Triggered alerts are visible on the dashboard. Creation and evaluation
-            come in Module 5.
-          </p>
-        </div>
-      </section>
+
+      <AlertsClient initialAlerts={alerts} />
     </>
   );
 }

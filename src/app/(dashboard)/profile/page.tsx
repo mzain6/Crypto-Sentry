@@ -1,4 +1,13 @@
-export default function ProfilePage() {
+import { auth } from "@/auth";
+import { ProfileClient } from "@/components/profile/profile-client";
+import { getProfileSummary } from "@/lib/profile";
+
+export default async function ProfilePage() {
+  const session = await auth();
+  const profile = session?.user?.id
+    ? await getProfileSummary(session.user.id)
+    : null;
+
   return (
     <>
       <section className="terminal-page-heading">
@@ -10,13 +19,17 @@ export default function ProfilePage() {
           <p>Operator identity and account controls</p>
         </div>
       </section>
-      <section className="terminal-panel terminal-empty-panel">
-        <div>
-          <div className="terminal-panel-kicker">User Instance</div>
-          <h2>Profile Module Pending</h2>
-          <p>Profile controls will be connected after the dashboard data view.</p>
-        </div>
-      </section>
+      {profile ? (
+        <ProfileClient profile={profile} />
+      ) : (
+        <section className="terminal-panel terminal-empty-panel">
+          <div>
+            <div className="terminal-panel-kicker">User Instance</div>
+            <h2>Profile Not Found</h2>
+            <p>Could not load the current profile.</p>
+          </div>
+        </section>
+      )}
     </>
   );
 }

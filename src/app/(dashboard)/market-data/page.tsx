@@ -2,6 +2,8 @@ import { auth } from "@/auth";
 import { MarketTable } from "@/components/watchlist/market-table";
 import { getMarketCoins } from "@/lib/watchlist";
 
+export const dynamic = "force-dynamic";
+
 export default async function MarketDataPage() {
   const session = await auth();
   const initialData = session?.user?.id

@@ -258,9 +258,10 @@ export async function getTopMovers(): Promise<TopMovers> {
   };
 }
 
-export async function getRecentAlerts(_userId: string): Promise<RecentAlert[]> {
+export async function getRecentAlerts(userId: string): Promise<RecentAlert[]> {
   const alerts = await prisma.alert.findMany({
     where: {
+      userId,
       status: AlertStatus.TRIGGERED,
     },
     orderBy: [{ triggeredAt: "desc" }, { createdAt: "desc" }],

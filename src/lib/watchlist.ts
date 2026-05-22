@@ -3,7 +3,6 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 const DEFAULT_PAGE_SIZE = 20;
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 export type MarketSort = "change" | "marketCap" | "price";
 export type SortDirection = "asc" | "desc";
@@ -33,7 +32,6 @@ export type MarketCoinsResult = {
 export type UserWatchlistCoin = MarketCoin & {
   watchlistId: string;
   addedAt: string;
-  sparkline: number[];
 };
 
 type CoinWithLatestSnapshot = {
@@ -239,12 +237,8 @@ export async function getUserWatchlist(
       coin: {
         include: {
           priceSnapshots: {
-            where: {
-              recordedAt: {
-                gte: new Date(Date.now() - SEVEN_DAYS_MS),
-              },
-            },
-            orderBy: { recordedAt: "asc" },
+            orderBy: { recordedAt: "desc" },
+            take: 1,
           },
         },
       },
@@ -252,8 +246,7 @@ export async function getUserWatchlist(
   });
 
   return rows.map((row) => {
-    const snapshots = row.coin.priceSnapshots;
-    const latest = snapshots[snapshots.length - 1];
+    const latest = row.coin.priceSnapshots[0];
 
     return {
       id: row.coin.id,
@@ -271,9 +264,6 @@ export async function getUserWatchlist(
       isWatchlisted: true,
       watchlistId: row.id,
       addedAt: row.createdAt.toISOString(),
-      sparkline: snapshots
-        .map((snapshot) => toNumber(snapshot.priceUsd) ?? 0)
-        .slice(-24),
     };
   });
 }

@@ -15,6 +15,8 @@ type DashboardClientProps = {
   initialData: DashboardData | null;
 };
 
+const DASHBOARD_REFRESH_INTERVAL_MS = 5_000;
+
 export function DashboardClient({ initialData }: DashboardClientProps) {
   const [data, setData] = useState(initialData);
 
@@ -37,7 +39,10 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       }
     }
 
-    const interval = window.setInterval(refreshDashboard, 30_000);
+    const interval = window.setInterval(
+      refreshDashboard,
+      DASHBOARD_REFRESH_INTERVAL_MS,
+    );
 
     return () => {
       active = false;
@@ -67,7 +72,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         <MarketPulse portfolio={data.portfolio} />
         <WatchlistSnapshot watchlist={data.watchlist} />
       </div>
-      <DashboardTour enabled />
+      <DashboardTour enabled={!data.hasSeenDashboardTutorial} />
     </>
   );
 }

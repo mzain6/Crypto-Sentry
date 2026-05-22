@@ -17,7 +17,7 @@ type PasswordActionState = {
 };
 
 const GENERIC_FORGOT_PASSWORD_MESSAGE =
-  "If this account exists and is verified, a password link has been created.";
+  "If this account exists, a password link has been created.";
 
 function buildPasswordUpdateUrl(token: string) {
   const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
@@ -50,7 +50,7 @@ export async function forgotPasswordAction(
     },
   });
 
-  if (!user?.emailVerified) {
+  if (!user) {
     return { message: GENERIC_FORGOT_PASSWORD_MESSAGE, tone: "success" };
   }
 

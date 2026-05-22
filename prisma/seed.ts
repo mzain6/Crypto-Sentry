@@ -93,13 +93,11 @@ async function main() {
     update: {
       name: "Test User",
       passwordHash,
-      emailVerified: new Date(),
     },
     create: {
       name: "Test User",
       email: "test@example.com",
       passwordHash,
-      emailVerified: new Date(),
     },
   });
 
@@ -116,23 +114,6 @@ async function main() {
         symbol: demoCoin.symbol,
         name: demoCoin.name,
         imageUrl: demoCoin.imageUrl,
-      },
-    });
-
-    await prisma.portfolioHolding.upsert({
-      where: {
-        userId_coinId: {
-          userId: user.id,
-          coinId: coin.id,
-        },
-      },
-      update: {
-        quantity: demoCoin.quantity.toString(),
-      },
-      create: {
-        userId: user.id,
-        coinId: coin.id,
-        quantity: demoCoin.quantity.toString(),
       },
     });
 

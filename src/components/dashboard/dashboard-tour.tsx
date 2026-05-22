@@ -323,7 +323,7 @@ export function DashboardTour({ enabled }: DashboardTourProps) {
 
             <div className="dashboard-tour-actions">
               <button onClick={() => void completeTour()} type="button">
-                Skip Induction
+                Skip Introduction
               </button>
               <button className="primary" onClick={handlePrimaryAction} type="button">
                 {isFinalStep ? "Finish" : "Got it"}

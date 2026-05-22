@@ -49,7 +49,8 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
       >
         {navItems.map((item) => {
           const active =
-            pathname === item.href || pathname.startsWith(`${item.href}/`);
+            pathname === item.href ||
+            pathname.startsWith(`${item.href}/`);
 
           return (
             <Link

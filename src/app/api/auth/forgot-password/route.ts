@@ -22,11 +22,12 @@ export async function POST(request: Request) {
     const { token, tokenHash } = createResetToken();
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
-    await prisma.passwordResetToken.create({
+    await prisma.user.update({
+      where: { id: user.id },
       data: {
-        userId: user.id,
-        tokenHash,
-        expiresAt,
+        passwordTokenHash: tokenHash,
+        passwordTokenType: user.passwordHash ? "reset" : "set",
+        passwordTokenExpiry: expiresAt,
       },
     });
 
@@ -40,4 +41,3 @@ export async function POST(request: Request) {
       "If an account exists for that email, a reset link has been created.",
   });
 }
-

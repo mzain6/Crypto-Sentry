@@ -776,6 +776,7 @@ p {
   align-items: center;
   display: flex;
   gap: 20px;
+  margin-left: auto;
 }
 
 .terminal-network {
@@ -2252,6 +2253,7 @@ p {
 
 .watchlist-sortbar button,
 .watch-toggle,
+.watch-star-toggle,
 .watchlist-pagination button,
 .watchlist-link-button,
 .watchlist-empty-state a {
@@ -2270,6 +2272,7 @@ p {
 
 .watchlist-sortbar button.active,
 .watch-toggle.active,
+.watch-star-toggle.active,
 .watchlist-link-button,
 .watchlist-empty-state a {
   border-color: rgba(0, 255, 76, 0.66);
@@ -2279,6 +2282,48 @@ p {
 
 .watch-toggle.danger {
   border-color: rgba(255, 68, 92, 0.5);
+  color: #ff4d63;
+}
+
+.watch-star-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: inline-flex;
+  font-size: 1.18rem;
+  height: 40px;
+  justify-content: center;
+  justify-self: start;
+  letter-spacing: 0;
+  padding: 0;
+  width: 40px;
+}
+
+.watch-star-toggle span {
+  display: block;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.watch-star-toggle.active {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.watch-star-toggle.compact {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #00ff4c;
+  height: 28px;
+  margin-left: auto;
+  width: 28px;
+}
+
+.watch-star-toggle.compact:hover {
   color: #ff4d63;
 }
 
@@ -2298,9 +2343,13 @@ p {
   border-bottom: 1px solid rgba(255, 255, 255, 0.055);
   display: grid;
   gap: 14px;
-  grid-template-columns: minmax(220px, 1.5fr) repeat(4, minmax(110px, 1fr));
+  grid-template-columns: minmax(220px, 1.5fr) repeat(3, minmax(110px, 1fr)) minmax(74px, 90px);
   min-height: 66px;
   padding: 10px 14px;
+}
+
+.watchlist-row > :last-child {
+  justify-self: end;
 }
 
 .watchlist-screen-table .watchlist-row {
@@ -2600,6 +2649,447 @@ p {
   color: #00ff4c;
 }
 
+.watchlist-card-remove-action {
+  cursor: pointer;
+  width: 100%;
+}
+
+.watchlist-card-remove-action:hover {
+  border-color: rgba(255, 77, 99, 0.45);
+  color: #ff4d63;
+}
+
+.terminal-nav-badge {
+  align-items: center;
+  background: #00ff4c;
+  border-radius: 999px;
+  color: #001406;
+  display: inline-flex;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+  height: 20px;
+  justify-content: center;
+  margin-left: auto;
+  min-width: 20px;
+  padding: 0 6px;
+}
+
+.alerts-module-panel {
+  margin: 0 auto;
+  max-width: 1180px;
+}
+
+.alerts-management-list {
+  display: grid;
+  gap: 16px;
+}
+
+.alerts-management-card {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.045), transparent 46%),
+    rgba(22, 22, 22, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(230px, 1.5fr) repeat(4, minmax(120px, 1fr)) auto;
+  padding: 18px;
+}
+
+.alerts-management-main {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  min-width: 0;
+}
+
+.alerts-management-main strong,
+.alerts-management-main span,
+.alerts-management-metric strong,
+.alerts-management-metric span {
+  display: block;
+}
+
+.alerts-management-main strong {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.alerts-management-main span,
+.alerts-management-metric span {
+  color: #727a73;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+
+.alerts-management-metric strong {
+  color: #f5fff7;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.92rem;
+  font-weight: 900;
+  margin-top: 6px;
+}
+
+.alert-status.triggered {
+  color: #ff4d63;
+}
+
+.alert-status.active {
+  color: #00ff4c;
+}
+
+.alert-status.paused {
+  color: #f0b84f;
+}
+
+.alerts-management-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.alerts-management-actions button {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 9px;
+  color: #e7eee9;
+  cursor: pointer;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+  min-height: 34px;
+  padding: 0 12px;
+  text-transform: uppercase;
+}
+
+.alerts-management-actions button:hover {
+  border-color: rgba(0, 255, 76, 0.42);
+  color: #00ff4c;
+}
+
+.profile-module-panel {
+  margin: 0 auto;
+  max-width: 1180px;
+}
+
+.profile-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.profile-card {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), transparent 58%),
+    rgba(18, 20, 19, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 24px 70px rgba(0, 0, 0, 0.25);
+  padding: 26px;
+}
+
+.profile-identity-card {
+  align-items: center;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: auto 1fr;
+}
+
+.profile-identity-card h2 {
+  color: #ffffff;
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-style: italic;
+  line-height: 1;
+  margin: 8px 0;
+  text-transform: uppercase;
+}
+
+.profile-identity-card p,
+.profile-meta-row span,
+.profile-stat-grid span,
+.profile-form label span,
+.profile-form small {
+  color: #87918e;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.profile-avatar-large {
+  align-items: center;
+  background: rgba(0, 255, 76, 0.08);
+  border: 1px solid rgba(0, 255, 76, 0.6);
+  border-radius: 18px;
+  color: #00ff4c;
+  display: flex;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 2rem;
+  font-weight: 900;
+  height: 96px;
+  justify-content: center;
+  overflow: hidden;
+  width: 96px;
+}
+
+.profile-avatar-large img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.profile-meta-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  padding-top: 18px;
+}
+
+.profile-meta-row strong,
+.profile-stat-grid strong {
+  color: #ffffff;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 1.15rem;
+}
+
+.profile-stat-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 26px;
+}
+
+.profile-stat-grid div {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.profile-form {
+  display: grid;
+  gap: 18px;
+}
+
+.profile-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.profile-form input {
+  background: rgba(8, 11, 10, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: #ffffff;
+  font: 800 0.95rem "Consolas", "Courier New", monospace;
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.profile-form input[type="file"] {
+  align-items: center;
+  display: flex;
+  padding: 12px;
+}
+
+.profile-form input:focus {
+  border-color: rgba(0, 255, 76, 0.68);
+  box-shadow: 0 0 0 3px rgba(0, 255, 76, 0.08);
+  outline: none;
+}
+
+.profile-form button {
+  background: #00ff4c;
+  border: 0;
+  border-radius: 12px;
+  color: #001406;
+  cursor: pointer;
+  font: 900 0.82rem "Consolas", "Courier New", monospace;
+  letter-spacing: 0.14em;
+  min-height: 48px;
+  text-transform: uppercase;
+}
+
+.profile-form button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.profile-strength-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-strength-grid span {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+  color: #87918e;
+  font: 800 0.65rem "Consolas", "Courier New", monospace;
+  letter-spacing: 0.12em;
+  padding: 7px 10px;
+  text-transform: uppercase;
+}
+
+.profile-strength-grid span.passed {
+  border-color: rgba(0, 255, 76, 0.55);
+  color: #00ff4c;
+}
+
+.profile-toast {
+  border-radius: 14px;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  text-transform: uppercase;
+}
+
+.profile-toast.success {
+  background: rgba(0, 255, 76, 0.1);
+  border: 1px solid rgba(0, 255, 76, 0.28);
+  color: #7dff9d;
+}
+
+.profile-toast.error {
+  background: rgba(255, 55, 82, 0.1);
+  border: 1px solid rgba(255, 55, 82, 0.35);
+  color: #ff8798;
+}
+
+.settings-module-panel {
+  margin: 0 auto;
+  max-width: 760px;
+}
+
+.settings-card {
+  background:
+    linear-gradient(135deg, rgba(0, 255, 76, 0.06), transparent 54%),
+    rgba(18, 20, 19, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 24px 70px rgba(0, 0, 0, 0.25);
+  padding: 26px;
+}
+
+.settings-form {
+  display: grid;
+  gap: 22px;
+}
+
+.settings-form label {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-form label span,
+.settings-form small,
+.settings-threshold-example span {
+  color: #87918e;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.settings-input-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.settings-input-row input {
+  background: rgba(8, 11, 10, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: #ffffff;
+  flex: 1;
+  font: 900 1.2rem "Consolas", "Courier New", monospace;
+  min-height: 52px;
+  padding: 0 14px;
+}
+
+.settings-input-row input:focus {
+  border-color: rgba(0, 255, 76, 0.68);
+  box-shadow: 0 0 0 3px rgba(0, 255, 76, 0.08);
+  outline: none;
+}
+
+.settings-input-row strong {
+  color: #00ff4c;
+  font: 900 1.1rem "Consolas", "Courier New", monospace;
+}
+
+.settings-threshold-meter {
+  border-radius: 999px;
+  display: inline-flex;
+  font: 900 0.72rem "Consolas", "Courier New", monospace;
+  justify-self: start;
+  letter-spacing: 0.14em;
+  padding: 7px 12px;
+  text-transform: uppercase;
+}
+
+.settings-threshold-meter.positive {
+  background: rgba(0, 255, 76, 0.1);
+  border: 1px solid rgba(0, 255, 76, 0.34);
+  color: #00ff4c;
+}
+
+.settings-threshold-meter.negative {
+  background: rgba(255, 77, 99, 0.1);
+  border: 1px solid rgba(255, 77, 99, 0.34);
+  color: #ff4d63;
+}
+
+.settings-threshold-example {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.settings-threshold-example strong {
+  color: #ffffff;
+  font: 900 0.95rem "Consolas", "Courier New", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.settings-form button {
+  background: #00ff4c;
+  border: 0;
+  border-radius: 12px;
+  color: #001406;
+  cursor: pointer;
+  font: 900 0.82rem "Consolas", "Courier New", monospace;
+  letter-spacing: 0.14em;
+  min-height: 48px;
+  text-transform: uppercase;
+}
+
+.settings-form button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
 @media (max-width: 960px) {
   .watchlist-card-grid {
     grid-template-columns: repeat(2, minmax(220px, 1fr));
@@ -2639,7 +3129,8 @@ p {
   }
 
   .terminal-sidebar-user-copy,
-  .terminal-sidebar-user .terminal-logout {
+  .terminal-sidebar-user .terminal-logout,
+  .terminal-nav-badge {
     display: none;
   }
 
@@ -2687,6 +3178,20 @@ p {
 
 @media (max-width: 640px) {
   .watchlist-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .alerts-management-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .alerts-management-main,
+  .alerts-management-actions {
+    grid-column: 1 / -1;
+  }
+
+  .profile-grid,
+  .profile-stat-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2771,6 +3276,18 @@ p {
   .coin-row {
     align-items: flex-start;
     flex-wrap: wrap;
+  }
+
+  .alerts-management-card {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-card {
+    padding: 20px;
+  }
+
+  .profile-identity-card {
+    grid-template-columns: 1fr;
   }
 
   .page {

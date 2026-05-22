@@ -17,15 +17,16 @@ export async function POST(request: Request) {
   }
 
   const tokenHash = hashResetToken(parsed.data.token);
-  const resetToken = await prisma.passwordResetToken.findUnique({
-    where: { tokenHash },
+  const user = await prisma.user.findFirst({
+    where: {
+      passwordTokenHash: tokenHash,
+      passwordTokenExpiry: {
+        gt: new Date(),
+      },
+    },
   });
 
-  if (
-    !resetToken ||
-    resetToken.usedAt ||
-    resetToken.expiresAt.getTime() < Date.now()
-  ) {
+  if (!user) {
     return NextResponse.json(
       { message: "This reset link is invalid or has expired." },
       { status: 400 },
@@ -34,17 +35,15 @@ export async function POST(request: Request) {
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 12);
 
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: resetToken.userId },
-      data: { passwordHash },
-    }),
-    prisma.passwordResetToken.update({
-      where: { id: resetToken.id },
-      data: { usedAt: new Date() },
-    }),
-  ]);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash,
+      passwordTokenHash: null,
+      passwordTokenType: null,
+      passwordTokenExpiry: null,
+    },
+  });
 
   return NextResponse.json({ message: "Password has been reset." });
 }
-

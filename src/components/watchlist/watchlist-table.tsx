@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { CoinLogo } from "@/components/dashboard/coin-logo";
 import { formatCurrency, formatPercent } from "@/components/dashboard/format";
@@ -12,22 +13,88 @@ export function WatchlistTable({
 }: {
   initialWatchlist: UserWatchlistCoin[];
 }) {
+  const router = useRouter();
+  const [pendingCoinId, setPendingCoinId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [watchlist, setWatchlist] = useState(initialWatchlist);
 
+  useEffect(() => {
+    setWatchlist(initialWatchlist);
+  }, [initialWatchlist]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function refreshWatchlist() {
+      const response = await fetch("/api/watchlist", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = (await response.json()) as {
+        watchlist: UserWatchlistCoin[];
+      };
+
+      if (active) {
+        setWatchlist(data.watchlist);
+      }
+    }
+
+    const interval = window.setInterval(refreshWatchlist, 5_000);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  async function refreshWatchlistNow() {
+    const response = await fetch("/api/watchlist", {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return;
+    }
+
+    const data = (await response.json()) as {
+      watchlist: UserWatchlistCoin[];
+    };
+
+    setWatchlist(data.watchlist);
+  }
+
   async function removeCoin(coin: UserWatchlistCoin) {
+    if (pendingCoinId) {
+      return;
+    }
+
+    setPendingCoinId(coin.id);
+
     const response = await fetch(`/api/watchlist/${coin.id}`, {
       method: "DELETE",
     });
 
     if (!response.ok) {
       setToast("Could not remove coin");
+      setPendingCoinId(null);
       return;
     }
 
     setWatchlist((current) => current.filter((item) => item.id !== coin.id));
+    window.dispatchEvent(
+      new CustomEvent("watchlist:changed", {
+        detail: { coinId: coin.id, isWatchlisted: false },
+      }),
+    );
     setToast(`${coin.name} removed from watchlist`);
     window.setTimeout(() => setToast(null), 2400);
+    await refreshWatchlistNow();
+    router.refresh();
+    setPendingCoinId(null);
   }
 
   return (
@@ -61,14 +128,6 @@ export function WatchlistTable({
                   <strong>{coin.name}</strong>
                   <small>{coin.symbol}</small>
                 </div>
-                <button
-                  aria-label={`Remove ${coin.name} from watchlist`}
-                  className="watchlist-remove-button"
-                  onClick={() => void removeCoin(coin)}
-                  type="button"
-                >
-                  DEL
-                </button>
               </div>
 
               <div className="watchlist-target-price">
@@ -84,9 +143,14 @@ export function WatchlistTable({
                 {formatPercent(coin.priceChangePercentage24h)}
               </div>
 
-              <Link className="watchlist-analysis-link" href="/market-data">
-                Full Analysis
-              </Link>
+              <button
+                className="watchlist-analysis-link watchlist-card-remove-action"
+                disabled={pendingCoinId === coin.id}
+                onClick={() => void removeCoin(coin)}
+                type="button"
+              >
+                {pendingCoinId === coin.id ? "Removing..." : "Remove"}
+              </button>
             </article>
           ))}
         </div>

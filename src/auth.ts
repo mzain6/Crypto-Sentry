@@ -14,6 +14,10 @@ type GoogleProfile = {
   picture?: string;
 };
 
+type AuthUserWithSessionVersion = {
+  sessionVersion?: number;
+};
+
 function getProfileImage(profile: GoogleProfile) {
   return profile.image ?? profile.picture ?? null;
 }
@@ -37,7 +41,7 @@ const providers: NextAuthOptions["providers"] = [
         where: { email },
       });
 
-      if (!user?.passwordHash || !user.emailVerified) {
+      if (!user?.passwordHash) {
         return null;
       }
 
@@ -52,6 +56,7 @@ const providers: NextAuthOptions["providers"] = [
         name: user.name,
         email: user.email,
         image: user.imageUrl,
+        sessionVersion: user.sessionVersion,
       };
     },
   }),
@@ -100,14 +105,12 @@ export const authOptions: NextAuthOptions = {
         update: {
           name: googleProfile?.name ?? email,
           imageUrl: getProfileImage(googleProfile ?? {}),
-          emailVerified: new Date(),
         },
         create: {
           name: googleProfile?.name ?? email,
           email,
           imageUrl: getProfileImage(googleProfile ?? {}),
           passwordHash: null,
-          emailVerified: new Date(),
         },
       });
 
@@ -156,10 +159,13 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token, user, account, profile }) {
       if (user) {
+        const userWithSessionVersion = user as AuthUserWithSessionVersion;
+
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
         token.picture = user.image;
+        token.sessionVersion = userWithSessionVersion.sessionVersion ?? 0;
       }
 
       if (account?.provider === "google" && profile?.email) {
@@ -172,6 +178,7 @@ export const authOptions: NextAuthOptions = {
           token.name = dbUser.name;
           token.email = dbUser.email;
           token.picture = dbUser.imageUrl;
+          token.sessionVersion = dbUser.sessionVersion;
         }
       }
 
@@ -179,10 +186,36 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
+        const dbUser = token.id
+          ? await prisma.user.findUnique({
+              where: { id: String(token.id) },
+              select: {
+                email: true,
+                imageUrl: true,
+                name: true,
+                sessionVersion: true,
+              },
+            })
+          : null;
+
+        const tokenSessionVersion =
+          typeof token.sessionVersion === "number" ? token.sessionVersion : 0;
+
+        if (!dbUser || tokenSessionVersion !== dbUser.sessionVersion) {
+          session.user.id = "";
+          session.user.name = null;
+          session.user.email = null;
+          session.user.image = null;
+          session.user.sessionVersion = undefined;
+
+          return session;
+        }
+
         session.user.id = String(token.id);
-        session.user.name = token.name;
-        session.user.email = token.email;
-        session.user.image = token.picture;
+        session.user.name = dbUser.name;
+        session.user.email = dbUser.email;
+        session.user.image = dbUser.imageUrl;
+        session.user.sessionVersion = dbUser.sessionVersion;
       }
 
       return session;
