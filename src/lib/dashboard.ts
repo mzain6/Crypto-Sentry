@@ -35,6 +35,15 @@ export type TopMovers = {
   losers: DashboardCoin[];
 };
 
+export type SentryAnalytics = {
+  trend: "BULLISH" | "BEARISH" | "NEUTRAL";
+  volatilityIndex: number;
+  volatilityLabel: "LOW" | "ELEVATED" | "HIGH";
+  buyPressure: number;
+  buyPressureLabel: "LOW" | "BALANCED" | "HIGH";
+  hasLiquidityPressure: boolean;
+};
+
 export type RecentAlert = {
   id: string;
   coin: Pick<DashboardCoin, "id" | "symbol" | "name" | "imageUrl">;
@@ -52,6 +61,7 @@ export type WatchlistSnapshotItem = DashboardCoin & {
 export type DashboardData = {
   portfolio: PortfolioSummary;
   topMovers: TopMovers;
+  sentryAnalytics: SentryAnalytics;
   recentAlerts: RecentAlert[];
   watchlist: WatchlistSnapshotItem[];
   hasSeenDashboardTutorial: boolean;
@@ -258,6 +268,73 @@ export async function getTopMovers(): Promise<TopMovers> {
   };
 }
 
+function emptySentryAnalytics(): SentryAnalytics {
+  return {
+    trend: "NEUTRAL",
+    volatilityIndex: 0,
+    volatilityLabel: "LOW",
+    buyPressure: 0,
+    buyPressureLabel: "LOW",
+    hasLiquidityPressure: false,
+  };
+}
+
+function getUniqueCoinsById(coins: DashboardCoin[]) {
+  const coinById = new Map<string, DashboardCoin>();
+
+  for (const coin of coins) {
+    coinById.set(coin.id, coin);
+  }
+
+  return [...coinById.values()];
+}
+
+export function getSentryAnalytics(
+  topMovers: TopMovers,
+  watchlist: WatchlistSnapshotItem[],
+): SentryAnalytics {
+  const sourceCoins =
+    watchlist.length > 0
+      ? watchlist
+      : getUniqueCoinsById([...topMovers.gainers, ...topMovers.losers]);
+  const changes = sourceCoins
+    .map((coin) => coin.priceChangePercentage24h)
+    .filter((change): change is number => change !== null);
+
+  if (changes.length === 0) {
+    return emptySentryAnalytics();
+  }
+
+  const averageChange =
+    changes.reduce((total, change) => total + change, 0) / changes.length;
+  const averageAbsoluteChange =
+    changes.reduce((total, change) => total + Math.abs(change), 0) /
+    changes.length;
+  const positiveCount = changes.filter((change) => change > 0).length;
+  const buyPressure = Math.round((positiveCount / changes.length) * 100);
+  const volatilityIndex = Number(averageAbsoluteChange.toFixed(1));
+
+  return {
+    trend:
+      averageChange > 0.1
+        ? "BULLISH"
+        : averageChange < -0.1
+          ? "BEARISH"
+          : "NEUTRAL",
+    volatilityIndex,
+    volatilityLabel:
+      volatilityIndex >= 5
+        ? "HIGH"
+        : volatilityIndex >= 2
+          ? "ELEVATED"
+          : "LOW",
+    buyPressure,
+    buyPressureLabel:
+      buyPressure >= 60 ? "HIGH" : buyPressure >= 40 ? "BALANCED" : "LOW",
+    hasLiquidityPressure: changes.some((change) => change <= -2),
+  };
+}
+
 export async function getRecentAlerts(userId: string): Promise<RecentAlert[]> {
   const alerts = await prisma.alert.findMany({
     where: {
@@ -328,6 +405,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   return {
     portfolio,
     topMovers,
+    sentryAnalytics: getSentryAnalytics(topMovers, watchlist),
     recentAlerts,
     watchlist,
     hasSeenDashboardTutorial,

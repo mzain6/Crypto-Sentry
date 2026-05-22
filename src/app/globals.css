@@ -1136,6 +1136,11 @@ p {
   color: #00ff4c;
 }
 
+.analytics-metric strong.negative,
+.analytics-copy strong.negative {
+  color: #ff4d63;
+}
+
 .mover-columns {
   display: grid;
   gap: 18px;
