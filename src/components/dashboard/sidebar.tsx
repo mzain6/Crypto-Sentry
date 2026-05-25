@@ -4,6 +4,7 @@ import type { Session } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { DashboardLogoutButton } from "./logout-button";
 
@@ -31,9 +32,26 @@ function getInitial(name?: string | null) {
 
 export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   return (
-    <aside className="terminal-sidebar">
+    <aside className={menuOpen ? "terminal-sidebar open" : "terminal-sidebar"}>
+      <button
+        aria-expanded={menuOpen}
+        aria-label="Toggle dashboard navigation"
+        className="terminal-sidebar-toggle"
+        onClick={() => setMenuOpen((open) => !open)}
+        type="button"
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
       <div className="terminal-brand" id="sidebar-brand">
         <div className="terminal-brand-mark" aria-hidden="true" />
         <div>
@@ -58,6 +76,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
               href={item.href}
               id={item.id}
               key={item.href}
+              prefetch
             >
               <span className={`terminal-nav-icon ${item.icon}`} aria-hidden="true" />
               {item.label}

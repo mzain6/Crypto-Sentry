@@ -14,24 +14,24 @@ export function MarketOverview({ portfolio }: MarketOverviewProps) {
         <span className="panel-icon globe" aria-hidden="true" />
         <div>
           <h2>Market Overview</h2>
-          <p>Portfolio-linked feed</p>
+          <p>Watchlist-linked feed</p>
         </div>
       </div>
 
       <div className="overview-stack">
         <OverviewMetric
-          icon="◎"
-          label="Portfolio Value"
+          iconClass="watchlist-value"
+          label="Watchlist Value"
           value={formatCompactCurrency(portfolio.totalValueUsd)}
         />
         <OverviewMetric
-          icon="▣"
-          label="24h Movement"
+          iconClass="movement"
+          label="Watchlist 24h Move"
           value={formatCurrency(portfolio.change24hUsd)}
         />
         <OverviewMetric
-          icon="▥"
-          label="Market Change"
+          iconClass="market-change"
+          label="Watchlist Change"
           tone={positive ? "positive" : "negative"}
           value={formatPercent(portfolio.change24hPercentage)}
         />
@@ -41,19 +41,22 @@ export function MarketOverview({ portfolio }: MarketOverviewProps) {
 }
 
 function OverviewMetric({
-  icon,
+  iconClass,
   label,
   tone,
   value,
 }: {
-  icon: string;
+  iconClass: string;
   label: string;
   tone?: "positive" | "negative";
   value: string;
 }) {
   return (
     <div className="overview-metric">
-      <span className={`overview-icon ${tone ?? ""}`}>{icon}</span>
+      <span
+        className={`overview-icon ${iconClass} ${tone ?? ""}`}
+        aria-hidden="true"
+      />
       <div>
         <small>{label}</small>
         <strong className={tone ? `change ${tone}` : undefined}>{value}</strong>

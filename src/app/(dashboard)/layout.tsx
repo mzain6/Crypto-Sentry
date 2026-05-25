@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/auth";
 import { DashboardFrame } from "@/components/dashboard/dashboard-frame";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
+import { getCurrentSession } from "@/lib/auth/session";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -12,7 +12,7 @@ type DashboardLayoutProps = {
 export default async function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
-  const session = await auth();
+  const session = await getCurrentSession();
 
   if (!session?.user?.id) {
     redirect("/login?returnUrl=/dashboard");

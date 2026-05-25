@@ -11,6 +11,14 @@ type EvaluationResult = {
   alertsTriggered: number;
 };
 
+function timestamp() {
+  return new Date().toLocaleTimeString("en-US", { hour12: false });
+}
+
+function shortId(id: string) {
+  return id.slice(0, 8);
+}
+
 function toNumber(value: Prisma.Decimal | number | string | null) {
   if (value === null) {
     return null;
@@ -119,7 +127,7 @@ export async function evaluateWatchlistFlashCrashes(): Promise<EvaluationResult>
         continue;
       }
 
-      await prisma.alert.create({
+      const alert = await prisma.alert.create({
         data: {
           userId: watchlistRow.userId,
           coinId,
@@ -130,6 +138,16 @@ export async function evaluateWatchlistFlashCrashes(): Promise<EvaluationResult>
           triggeredPriceUsd: currentPrice.toString(),
         },
       });
+
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          `[${timestamp()}] [alerts] triggered alert=${shortId(alert.id)} user=${shortId(
+            watchlistRow.userId,
+          )} coin=${watchlistRow.coin.symbol.toUpperCase()} condition=${condition} change=${changePercent.toFixed(
+            2,
+          )}% baseline=${baselinePrice.toFixed(4)} current=${currentPrice.toFixed(4)}`,
+        );
+      }
 
       alertsTriggered += 1;
     }

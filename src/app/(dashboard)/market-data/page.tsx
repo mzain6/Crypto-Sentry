@@ -1,11 +1,11 @@
-import { auth } from "@/auth";
 import { MarketTable } from "@/components/watchlist/market-table";
+import { getCurrentSession } from "@/lib/auth/session";
 import { getMarketCoins } from "@/lib/watchlist";
 
 export const dynamic = "force-dynamic";
 
 export default async function MarketDataPage() {
-  const session = await auth();
+  const session = await getCurrentSession();
   const initialData = session?.user?.id
     ? await getMarketCoins({
         direction: "desc",
@@ -26,7 +26,9 @@ export default async function MarketDataPage() {
   return (
     <>
       <section className="terminal-page-heading">
-        <div className="terminal-page-icon" aria-hidden="true">
+        <div className="terminal-page-icon market-data-icon" aria-hidden="true">
+          <span />
+          <span />
           <span />
         </div>
         <div>

@@ -1,9 +1,9 @@
-import { auth } from "@/auth";
 import { ProfileClient } from "@/components/profile/profile-client";
+import { getCurrentSession } from "@/lib/auth/session";
 import { getProfileSummary } from "@/lib/profile";
 
 export default async function ProfilePage() {
-  const session = await auth();
+  const session = await getCurrentSession();
   const profile = session?.user?.id
     ? await getProfileSummary(session.user.id)
     : null;
@@ -11,7 +11,7 @@ export default async function ProfilePage() {
   return (
     <>
       <section className="terminal-page-heading">
-        <div className="terminal-page-icon" aria-hidden="true">
+        <div className="terminal-page-icon profile-page-icon" aria-hidden="true">
           <span />
         </div>
         <div>
