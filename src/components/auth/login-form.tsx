@@ -70,7 +70,7 @@ export function LoginForm({ googleEnabled, returnUrl }: LoginFormProps) {
       >
         {googleEnabled ? "Sign in with Google" : "Google sign-in not configured"}
       </button>
-      <div className="auth-links">
+      <div className="auth-links auth-links-split">
         <Link href="/forgot-password">Recover access</Link>
         <Link href="/signup">Request access</Link>
       </div>

@@ -2,7 +2,7 @@
 
 BitBash Crypto Sentry is a full-stack cryptocurrency monitoring app built with Next.js, PostgreSQL, Prisma, Auth.js/NextAuth, and live CoinGecko market data ingestion.
 
-The project currently includes Module 1 infrastructure and Module 2 authentication.
+The app includes authentication, a dark terminal-style dashboard, watchlist management, flash-movement alerts, profile management, and user settings.
 
 ## Tech Stack
 
@@ -22,33 +22,69 @@ The project currently includes Module 1 infrastructure and Module 2 authenticati
 ### Module 1: Project Setup and Infrastructure
 
 - Next.js + TypeScript project setup
-- App Router structure
 - PostgreSQL database support
-- Prisma schema, migrations, and seed script
+- Prisma schema and seed script
 - Reusable Prisma client
 - CoinGecko API client
-- Live coin ingestion job
-- Health check API route
-- Stored coins API route
-- Watchlist and alert database tables
+- Live ingestion job for coin prices
+- `/api/health` and `/api/coins`
 
 ### Module 2: Authentication
 
-- Email/password signup
-- Email/password login
+- Email/password signup and login
 - Password hashing with bcrypt
-- Google OAuth login
+- Google OAuth login through Auth.js
 - JWT session handling
 - Protected route middleware
 - Logout support
-- Google profile image support
-- Google OAuth token storage in the Prisma `accounts` table
-- Google access-token refresh helper
-- Email verification for new email/password users
-- Forgot password flow
-- Unified password reset/setup flow
+- Google OAuth token storage and refresh helper
+- Forgot password and password setup flow
 - Resend email provider integration
-- Dark terminal-style auth UI
+
+### Module 3: Dashboard
+
+- Protected dashboard layout
+- Dark BitBash terminal UI
+- Live dashboard data from PostgreSQL
+- Portfolio-style market overview
+- Featured asset cards
+- Sentry analytics formulas
+- System alerts panel
+- Guided dashboard tutorial
+
+### Module 4: Watchlist
+
+- Market Data screen
+- Searchable/sortable coin list
+- Star toggle for saving/removing watchlist coins
+- Watchlist page with saved coin cards
+- Protected watchlist API routes
+- 5-second frontend polling for watchlist/dashboard data
+
+### Module 5: Alerts
+
+- Watchlist-only alert evaluation
+- Positive threshold detects price raises
+- Negative threshold detects price drops
+- Default threshold is `-2%`
+- Alerts evaluated after ingestion cycles
+- Triggered alerts stored in PostgreSQL
+- Alerts page with delete support
+
+### Module 6: Profile
+
+- Profile view
+- Display name update
+- Profile image upload
+- Password change / password setup
+- Session invalidation after password change
+
+### Module 7: Settings
+
+- Per-user alert threshold setting
+- Positive/negative threshold indicator
+- Settings saved in PostgreSQL
+- Alert evaluator reads user threshold settings
 
 ## Environment Variables
 
@@ -58,8 +94,8 @@ Create a `.env` file in the project root.
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/crypto_sentry"
 
 COINGECKO_API_KEY=""
-COIN_INGEST_LIMIT=50
-COIN_INGEST_INTERVAL_SECONDS=60
+COIN_INGEST_LIMIT=100
+COIN_INGEST_INTERVAL_SECONDS=30
 
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="replace-with-a-long-random-secret"
@@ -73,39 +109,10 @@ AUTH_FROM_EMAIL="BitBash Crypto Sentry <onboarding@resend.dev>"
 
 ## Local Setup
 
-Install dependencies:
-
 ```powershell
 npm install
-```
-
-Generate Prisma client:
-
-```powershell
 npm run prisma:generate
-```
-
-Run database migrations:
-
-```powershell
-npm run prisma:migrate
-```
-
-Seed the database:
-
-```powershell
 npm run prisma:seed
-```
-
-Run one crypto ingestion cycle:
-
-```powershell
-npm run ingest:once
-```
-
-Start the development server:
-
-```powershell
 npm run dev
 ```
 
@@ -115,13 +122,11 @@ Open:
 http://localhost:3000
 ```
 
+`npm run dev` starts the Next.js dev server and the ingestion watcher.
+
 ## Database Setup
 
-PostgreSQL is required.
-
-Supported options:
-
-- Local PostgreSQL installation on Windows
+PostgreSQL is required. Docker is optional; local Windows PostgreSQL is supported.
 
 Default local database:
 
@@ -129,7 +134,7 @@ Default local database:
 crypto_sentry
 ```
 
-Example local connection string:
+Example connection string:
 
 ```env
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/crypto_sentry"
@@ -140,220 +145,106 @@ DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/crypto_sentry"
 Current Prisma schema includes:
 
 - `users`
+- `user_settings`
 - `accounts`
 - `coins`
 - `coin_price_snapshots`
 - `watchlists`
 - `alerts`
-- `password_reset_tokens`
 
 Important behavior:
 
 - `users.password_hash` is nullable so Google-only users can exist.
-- `users.email_verified` is `null` until an email/password user verifies their email.
-- `accounts` stores Google OAuth tokens.
-- `coins` stores coin identity data.
-- `coin_price_snapshots` stores live market price history.
+- `accounts` stores Google OAuth provider data and tokens.
+- `coin_price_snapshots` stores live price history.
 - `watchlists` stores user-selected coins.
-- `alerts` stores user price alert rules.
+- `alerts` stores triggered watchlist movement alerts.
+- `user_settings` stores dashboard tutorial state and alert threshold settings.
 
-## Crypto Ingestion
+## Ingestion Flow
 
-Run one ingestion cycle:
+The ingestion watcher fetches CoinGecko market data every configured interval and stores:
+
+- coin identity data in `coins`
+- latest price snapshots in `coin_price_snapshots`
+
+After each ingestion cycle, the alert evaluator checks watched coins against user thresholds.
+
+Useful commands:
 
 ```powershell
 npm run ingest:once
-```
-
-Run continuous ingestion:
-
-```powershell
 npm run ingest:watch
 ```
 
-With:
-
-```env
-COIN_INGEST_LIMIT=50
-```
-
-one ingestion run stores about 50 coins and 50 price snapshots. Later ingestion runs update coin identity data and add new price snapshot rows.
-
 ## Authentication Flow
 
-### Email/Password Signup
+Email/password login:
 
-1. User submits name, email, and password.
-2. Password is hashed with bcrypt.
-3. User is saved with `email_verified = null`.
-4. A secure email verification token is generated.
-5. Only the hashed token is saved in the database.
-6. A verification link is sent using Resend or logged in development fallback.
-7. User must verify email before login.
+1. User submits credentials on `/login`.
+2. Auth.js calls the Credentials provider in `src/auth.ts`.
+3. Prisma looks up the user by email.
+4. bcrypt compares the entered password with `users.password_hash`.
+5. Auth.js creates the JWT session cookie.
 
-### Email Verification
+Google login:
 
-Verification link format:
+1. User signs in with Google.
+2. Auth.js handles the OAuth callback.
+3. PrismaAdapter stores the user/account records.
+4. Google tokens are stored in the `accounts` table.
 
-```txt
-http://localhost:3000/verify-email?token=<token>
-```
+Forgot password:
 
-When the user opens the link:
+1. User submits email.
+2. A secure random token is generated.
+3. Only the hashed token is stored in the user row.
+4. The raw token is sent by email in the reset/setup link.
+5. The password is updated after token validation.
 
-- token is hashed
-- database token hash is checked
-- expiry is checked
-- `email_verified` is set to the current date/time
-- verification token fields are cleared
+## Main Routes
 
-### Login
-
-Email/password login only works after:
-
-```txt
-email_verified is not null
-```
-
-Google OAuth users are treated as verified because Google verifies the email address during OAuth.
-
-### Forgot Password
-
-Forgot password uses a generic success message for security:
-
-```txt
-If this account exists and is verified, a password link has been created.
-```
-
-A password link is only created when:
-
-- the user exists
-- the email is verified
-- the account has a password, or it is a linked Google account that needs first-time password setup
-
-If `email_verified` is `null`, no recovery email is sent.
-
-### Unified Password Update
-
-The `/update-password` page supports:
-
-- password reset for normal email/password users
-- first local password setup for Google users
-
-Token types:
-
-- `reset`
-- `set`
-
-Only hashed password tokens are stored.
-
-## Google OAuth
-
-Google OAuth is configured through Auth.js/NextAuth.
-
-Authorized JavaScript origin:
-
-```txt
-http://localhost:3000
-```
-
-Authorized redirect URI:
-
-```txt
-http://localhost:3000/api/auth/callback/google
-```
-
-Required env values:
-
-```env
-GOOGLE_CLIENT_ID="your-client-id"
-GOOGLE_CLIENT_SECRET="your-client-secret"
-```
-
-Google provider requests offline access so refresh tokens can be stored:
-
-- `prompt: "consent"`
-- `access_type: "offline"`
-- `response_type: "code"`
-
-Google token refresh helper:
-
-```txt
-src/lib/google-token.ts
-```
-
-Example protected Google profile API:
-
-```txt
-GET /api/google/profile
-```
-
-## Resend Email
-
-Email sending is handled through Resend.
-
-Required env values:
-
-```env
-RESEND_API_KEY="your-resend-api-key"
-AUTH_FROM_EMAIL="BitBash Crypto Sentry <onboarding@resend.dev>"
-```
-
-Notes:
-
-- Restart `npm run dev` after changing `.env`.
-- Without a verified custom domain, `onboarding@resend.dev` is usually limited to Resend test/verified recipients.
-- Check the Resend dashboard **Logs** tab when debugging delivery.
-- If Resend env values are missing in development, links are printed in the terminal.
-
-## Routes
-
-Frontend routes:
+Frontend:
 
 - `/`
 - `/login`
 - `/signup`
 - `/forgot-password`
-- `/reset-password`
 - `/update-password`
-- `/verify-email`
-- `/dashboard`
-
-Protected routes:
-
 - `/dashboard`
 - `/watchlist`
 - `/alerts`
+- `/market-data`
 - `/profile`
 - `/settings`
 
-API routes:
+API:
 
 - `GET /api/health`
 - `GET /api/coins`
-- `GET /api/google/profile`
-- `POST /api/auth/signup`
-- `POST /api/auth/verify-email`
-- `POST /api/auth/forgot-password`
-- `POST /api/auth/reset-password`
+- `GET /api/dashboard`
+- `GET /api/market`
+- `GET /api/watchlist`
+- `POST /api/watchlist/[coinId]`
+- `DELETE /api/watchlist/[coinId]`
+- `GET /api/alerts`
+- `DELETE /api/alerts/[alertId]`
+- `GET /api/profile`
+- `PATCH /api/profile`
+- `POST /api/profile/avatar`
+- `POST /api/profile/password`
+- `GET /api/settings`
+- `PATCH /api/settings`
 - `/api/auth/[...nextauth]`
 
 ## Test User
 
-After running:
-
-```powershell
-npm run prisma:seed
-```
-
-use:
+After running the seed script:
 
 ```txt
 Email: test@example.com
 Password: Password123
 ```
-
-If strict email verification is enabled, make sure the test user has `email_verified` set before testing login.
 
 ## Useful Commands
 
@@ -362,7 +253,6 @@ npm run dev
 npm run build
 npm run lint
 npm run prisma:generate
-npm run prisma:migrate
 npm run prisma:seed
 npm run ingest:once
 npm run ingest:watch
@@ -372,25 +262,20 @@ npm run ingest:watch
 
 Completed:
 
-- Module 1 infrastructure
+- Infrastructure
+- Authentication
+- Dashboard
+- Watchlist
+- Alerts
+- Profile
+- Settings
 - CoinGecko ingestion
-- Coins API
-- PostgreSQL + Prisma setup
-- Watchlist and alert tables
-- Module 2 authentication
-- Google OAuth
-- Google token refresh helper
-- Protected route middleware
-- Email verification
-- Forgot password and password setup flow
+- Google OAuth token refresh
 - Resend integration
-- Auth UI update
 
 Planned:
 
-- Production-ready email domain setup
-- Improved email delivery error display
-- Module 3 dashboard
-- Watchlist UI
-- Alerts UI
-- Profile and settings pages
+- Real wallet integration
+- Production email domain setup
+- Expanded alert notification channels
+- More detailed coin analysis views

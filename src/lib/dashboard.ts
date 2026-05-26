@@ -3,14 +3,6 @@ import { AlertCondition, AlertStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 const LIMIT = 5;
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-const DEMO_HOLDINGS = [
-  { providerId: "bitcoin", quantity: "0.28" },
-  { providerId: "ethereum", quantity: "3.4" },
-  { providerId: "solana", quantity: "42" },
-  { providerId: "ripple", quantity: "1800" },
-  { providerId: "chainlink", quantity: "95" },
-];
 
 export type DashboardCoin = {
   id: string;
@@ -35,6 +27,15 @@ export type TopMovers = {
   losers: DashboardCoin[];
 };
 
+export type SentryAnalytics = {
+  trend: "BULLISH" | "BEARISH" | "NEUTRAL";
+  volatilityIndex: number;
+  volatilityLabel: "LOW" | "ELEVATED" | "HIGH";
+  buyPressure: number;
+  buyPressureLabel: "LOW" | "BALANCED" | "HIGH";
+  hasLiquidityPressure: boolean;
+};
+
 export type RecentAlert = {
   id: string;
   coin: Pick<DashboardCoin, "id" | "symbol" | "name" | "imageUrl">;
@@ -52,6 +53,7 @@ export type WatchlistSnapshotItem = DashboardCoin & {
 export type DashboardData = {
   portfolio: PortfolioSummary;
   topMovers: TopMovers;
+  sentryAnalytics: SentryAnalytics;
   recentAlerts: RecentAlert[];
   watchlist: WatchlistSnapshotItem[];
   hasSeenDashboardTutorial: boolean;
@@ -107,33 +109,38 @@ function emptyPortfolio(): PortfolioSummary {
 }
 
 export async function getPortfolioSummary(
-  _userId: string,
+  userId: string,
 ): Promise<PortfolioSummary> {
-  const coins = await getDemoCoinsWithLatestPrices();
+  const watchlistRows = await prisma.watchlist.findMany({
+    where: { userId },
+    include: {
+      coin: {
+        include: {
+          priceSnapshots: {
+            orderBy: { recordedAt: "desc" },
+            take: 1,
+          },
+        },
+      },
+    },
+  });
 
-  if (coins.length === 0) {
+  if (watchlistRows.length === 0) {
     return emptyPortfolio();
   }
 
-  const quantityByProviderId = new Map(
-    DEMO_HOLDINGS.map((holding) => [
-      holding.providerId,
-      Number(holding.quantity),
-    ]),
-  );
+  const watchlistCoins = watchlistRows.map((row) => row.coin);
 
-  const totalValueUsd = coins.reduce((total, coin) => {
+  const totalValueUsd = watchlistCoins.reduce((total, coin) => {
     const dashboardCoin = toDashboardCoin(coin);
-    const quantity = quantityByProviderId.get(coin.providerId) ?? 0;
     const price = dashboardCoin.priceUsd ?? 0;
 
-    return total + quantity * price;
+    return total + price;
   }, 0);
 
-  const previousValueUsd = coins.reduce((total, coin) => {
+  const previousValueUsd = watchlistCoins.reduce((total, coin) => {
     const dashboardCoin = toDashboardCoin(coin);
-    const quantity = quantityByProviderId.get(coin.providerId) ?? 0;
-    const currentValue = quantity * (dashboardCoin.priceUsd ?? 0);
+    const currentValue = dashboardCoin.priceUsd ?? 0;
     const change = dashboardCoin.priceChangePercentage24h ?? 0;
 
     if (change <= -100) {
@@ -144,81 +151,21 @@ export async function getPortfolioSummary(
   }, 0);
 
   const change24hUsd = totalValueUsd - previousValueUsd;
+  const watchlistChanges = watchlistCoins
+    .map((coin) => toDashboardCoin(coin).priceChangePercentage24h)
+    .filter((change): change is number => change !== null);
   const change24hPercentage =
-    previousValueUsd > 0 ? (change24hUsd / previousValueUsd) * 100 : 0;
-  const sparkline = await getPortfolioSparkline();
+    watchlistChanges.length > 0
+      ? watchlistChanges.reduce((total, change) => total + change, 0) /
+        watchlistChanges.length
+      : 0;
 
   return {
     totalValueUsd,
     change24hUsd,
     change24hPercentage,
-    sparkline,
+    sparkline: [],
   };
-}
-
-async function getDemoCoinsWithLatestPrices() {
-  return prisma.coin.findMany({
-    where: {
-      providerId: {
-        in: DEMO_HOLDINGS.map((holding) => holding.providerId),
-      },
-    },
-    include: {
-      priceSnapshots: {
-        orderBy: { recordedAt: "desc" },
-        take: 1,
-      },
-    },
-    orderBy: { providerId: "asc" },
-  });
-}
-
-async function getPortfolioSparkline() {
-  const coins = await prisma.coin.findMany({
-    where: {
-      providerId: {
-        in: DEMO_HOLDINGS.map((holding) => holding.providerId),
-      },
-    },
-    include: {
-      priceSnapshots: {
-        where: {
-          recordedAt: {
-            gte: new Date(Date.now() - SEVEN_DAYS_MS),
-          },
-        },
-        orderBy: { recordedAt: "asc" },
-      },
-    },
-  });
-
-  if (coins.length === 0) {
-    return [];
-  }
-
-  const quantityByProviderId = new Map(
-    DEMO_HOLDINGS.map((holding) => [
-      holding.providerId,
-      Number(holding.quantity),
-    ]),
-  );
-  const valuesByDay = new Map<string, number>();
-
-  for (const coin of coins) {
-    const quantity = quantityByProviderId.get(coin.providerId) ?? 0;
-
-    for (const snapshot of coin.priceSnapshots) {
-      const dayKey = snapshot.recordedAt.toISOString().slice(0, 10);
-      const value = quantity * (toNumber(snapshot.priceUsd) ?? 0);
-
-      valuesByDay.set(dayKey, (valuesByDay.get(dayKey) ?? 0) + value);
-    }
-  }
-
-  return [...valuesByDay.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .slice(-7)
-    .map(([, value]) => value);
 }
 
 export async function getTopMovers(): Promise<TopMovers> {
@@ -255,6 +202,73 @@ export async function getTopMovers(): Promise<TopMovers> {
           (right.priceChangePercentage24h ?? 0),
       )
       .slice(0, LIMIT),
+  };
+}
+
+function emptySentryAnalytics(): SentryAnalytics {
+  return {
+    trend: "NEUTRAL",
+    volatilityIndex: 0,
+    volatilityLabel: "LOW",
+    buyPressure: 0,
+    buyPressureLabel: "LOW",
+    hasLiquidityPressure: false,
+  };
+}
+
+function getUniqueCoinsById(coins: DashboardCoin[]) {
+  const coinById = new Map<string, DashboardCoin>();
+
+  for (const coin of coins) {
+    coinById.set(coin.id, coin);
+  }
+
+  return [...coinById.values()];
+}
+
+export function getSentryAnalytics(
+  topMovers: TopMovers,
+  watchlist: WatchlistSnapshotItem[],
+): SentryAnalytics {
+  const sourceCoins =
+    watchlist.length > 0
+      ? watchlist
+      : getUniqueCoinsById([...topMovers.gainers, ...topMovers.losers]);
+  const changes = sourceCoins
+    .map((coin) => coin.priceChangePercentage24h)
+    .filter((change): change is number => change !== null);
+
+  if (changes.length === 0) {
+    return emptySentryAnalytics();
+  }
+
+  const averageChange =
+    changes.reduce((total, change) => total + change, 0) / changes.length;
+  const averageAbsoluteChange =
+    changes.reduce((total, change) => total + Math.abs(change), 0) /
+    changes.length;
+  const positiveCount = changes.filter((change) => change > 0).length;
+  const buyPressure = Math.round((positiveCount / changes.length) * 100);
+  const volatilityIndex = Number(averageAbsoluteChange.toFixed(1));
+
+  return {
+    trend:
+      averageChange > 0.1
+        ? "BULLISH"
+        : averageChange < -0.1
+          ? "BEARISH"
+          : "NEUTRAL",
+    volatilityIndex,
+    volatilityLabel:
+      volatilityIndex >= 5
+        ? "HIGH"
+        : volatilityIndex >= 2
+          ? "ELEVATED"
+          : "LOW",
+    buyPressure,
+    buyPressureLabel:
+      buyPressure >= 60 ? "HIGH" : buyPressure >= 40 ? "BALANCED" : "LOW",
+    hasLiquidityPressure: changes.some((change) => change <= -2),
   };
 }
 
@@ -328,6 +342,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   return {
     portfolio,
     topMovers,
+    sentryAnalytics: getSentryAnalytics(topMovers, watchlist),
     recentAlerts,
     watchlist,
     hasSeenDashboardTutorial,

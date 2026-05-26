@@ -1,9 +1,9 @@
-import { auth } from "@/auth";
 import { AlertsClient } from "@/components/alerts/alerts-client";
 import { getUserAlerts } from "@/lib/alerts";
+import { getCurrentSession } from "@/lib/auth/session";
 
 export default async function AlertsPage() {
-  const session = await auth();
+  const session = await getCurrentSession();
 
   if (!session?.user?.id) {
     return null;
@@ -14,7 +14,7 @@ export default async function AlertsPage() {
   return (
     <>
       <section className="terminal-page-heading">
-        <div className="terminal-page-icon" aria-hidden="true">
+        <div className="terminal-page-icon alerts-page-icon" aria-hidden="true">
           <span />
         </div>
         <div>

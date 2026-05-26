@@ -31,7 +31,7 @@ model UserSettings {
   id                           String   @id @default(cuid())
   userId                       String   @unique @map("user_id")
   hasSeenDashboardTutorial     Boolean  @default(false) @map("has_seen_dashboard_tutorial")
-  defaultAlertThresholdPercent Decimal  @default(2.0) @map("default_alert_threshold_percent") @db.Decimal(6, 3)
+  defaultAlertThresholdPercent Decimal  @default(-2.0) @map("default_alert_threshold_percent") @db.Decimal(6, 3)
   createdAt                    DateTime @default(now()) @map("created_at")
   updatedAt                    DateTime @updatedAt @map("updated_at")
   user                         User     @relation(fields: [userId], references: [id], onDelete: Cascade)

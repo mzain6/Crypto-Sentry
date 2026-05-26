@@ -1,9 +1,9 @@
-import { auth } from "@/auth";
 import { SettingsClient } from "@/components/settings/settings-client";
+import { getCurrentSession } from "@/lib/auth/session";
 import { getUserSettings } from "@/lib/settings";
 
 export default async function SettingsPage() {
-  const session = await auth();
+  const session = await getCurrentSession();
   const settings = session?.user?.id
     ? await getUserSettings(session.user.id)
     : null;
@@ -11,7 +11,7 @@ export default async function SettingsPage() {
   return (
     <>
       <section className="terminal-page-heading">
-        <div className="terminal-page-icon" aria-hidden="true">
+        <div className="terminal-page-icon settings-page-icon" aria-hidden="true">
           <span />
         </div>
         <div>

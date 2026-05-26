@@ -68,7 +68,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         <MarketOverview portfolio={data.portfolio} />
         <FeaturedAssets coins={data.watchlist} />
         <AlertsPanel alerts={data.recentAlerts} />
-        <TopMovers topMovers={data.topMovers} />
+        <TopMovers analytics={data.sentryAnalytics} topMovers={data.topMovers} />
         <MarketPulse portfolio={data.portfolio} />
         <WatchlistSnapshot watchlist={data.watchlist} />
       </div>

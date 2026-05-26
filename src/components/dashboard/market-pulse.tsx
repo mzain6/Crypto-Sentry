@@ -10,7 +10,7 @@ export function MarketPulse({ portfolio }: MarketPulseProps) {
 
   return (
     <section className="terminal-panel market-pulse-card">
-      <div className="terminal-panel-kicker">24h Market Change</div>
+      <div className="terminal-panel-kicker">24h Watchlist Change</div>
       <div className={positive ? "pulse-value positive" : "pulse-value negative"}>
         {formatPercent(portfolio.change24hPercentage)}
       </div>

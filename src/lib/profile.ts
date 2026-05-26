@@ -10,8 +10,8 @@ export type ProfileSummary = {
   name: string;
   email: string;
   imageUrl: string | null;
-  createdAt: string;
   hasPassword: boolean;
+  createdAt: string;
   watchlistCount: number;
   activeAlertCount: number;
   daysSinceJoining: number;
@@ -98,8 +98,8 @@ export async function getProfileSummary(
     name: user.name,
     email: user.email,
     imageUrl: user.imageUrl,
-    createdAt: user.createdAt.toISOString(),
     hasPassword: Boolean(user.passwordHash),
+    createdAt: user.createdAt.toISOString(),
     watchlistCount,
     activeAlertCount,
     daysSinceJoining,
@@ -128,7 +128,6 @@ export async function updateProfileName(userId: string, name: string) {
     },
   });
 }
-
 export async function updateProfileImage(userId: string, imageUrl: string) {
   return prisma.user.update({
     where: { id: userId },
@@ -147,7 +146,7 @@ export async function changeUserPassword({
   newPassword,
   userId,
 }: {
-  currentPassword?: string;
+  currentPassword: string;
   newPassword: string;
   userId: string;
 }) {
@@ -159,19 +158,19 @@ export async function changeUserPassword({
     },
   });
 
-  if (user?.passwordHash) {
-    if (!currentPassword) {
-      throw new Error("Current password is required.");
-    }
-
-    const currentPasswordMatches = await bcrypt.compare(
-      currentPassword,
-      user.passwordHash,
+  if (!user?.passwordHash) {
+    throw new Error(
+      "This account does not have a local password yet. Use password setup first.",
     );
+  }
 
-    if (!currentPasswordMatches) {
-      throw new Error("Current password is incorrect.");
-    }
+  const currentPasswordMatches = await bcrypt.compare(
+    currentPassword,
+    user.passwordHash,
+  );
+
+  if (!currentPasswordMatches) {
+    throw new Error("Current password is incorrect.");
   }
 
   const strength = validatePasswordStrength(newPassword);
