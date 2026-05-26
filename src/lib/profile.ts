@@ -10,6 +10,7 @@ export type ProfileSummary = {
   name: string;
   email: string;
   imageUrl: string | null;
+  hasPassword: boolean;
   createdAt: string;
   watchlistCount: number;
   activeAlertCount: number;
@@ -70,6 +71,7 @@ export async function getProfileSummary(
         id: true,
         imageUrl: true,
         name: true,
+        passwordHash: true,
       },
     }),
     prisma.watchlist.count({ where: { userId } }),
@@ -96,6 +98,7 @@ export async function getProfileSummary(
     name: user.name,
     email: user.email,
     imageUrl: user.imageUrl,
+    hasPassword: Boolean(user.passwordHash),
     createdAt: user.createdAt.toISOString(),
     watchlistCount,
     activeAlertCount,
